@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d5ed2fde9867b74f8ca4b345ab60e54, type: 3}
+  m_Name: Unit_Tori
+  m_EditorClassIdentifier: Assembly-CSharp::TDGame.Core.UnitDataSO
+  unitID: 
+  unitName: 
+  grade: 1
+  tribe: 1
+  damageType: 0
+  attackType: 1
+  baseDamage: 10
+  attackSpeed: 1.1
+  attackRange: 4
+  criticalChance: 0.05
+  criticalMultiplier: 1.5
+  maxMana: 100
+  manaGainOnAttack: 10
+  manaRegenPerSec: 2.5
+  skillDescription: "\uD1A0\uB07C\uAC70\uD488: \uACF5\uACA9 \uC2DC 20% \uD655\uB960\uB85C
+    \uACF5\uACA9\uB825\uC758 150% \uB9C8\uBC95 \uD53C\uD574\uB97C \uC785\uD788\uB294
+    \uAC70\uD488\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."

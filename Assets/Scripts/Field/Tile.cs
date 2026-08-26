@@ -7,36 +7,21 @@ namespace TDGame.Field
         public int gridX;
         public int gridY;
         public bool isOccupied = false;
-        public GameObject currentUnit = null;
+        public GameObject currentUnit;
 
-        [SerializeField] private SpriteRenderer spriteRenderer;
-        [SerializeField] private Color defaultColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
-        [SerializeField] private Color highlightColor = new Color(0.4f, 0.8f, 0.4f, 0.8f);
-
-        private void Awake()
-        {
-            if (spriteRenderer == null)
-                spriteRenderer = GetComponent<SpriteRenderer>();
-            SetHighlight(false);
-        }
-
-        public void SetHighlight(bool active)
-        {
-            if (spriteRenderer != null)
-                spriteRenderer.color = active ? highlightColor : defaultColor;
-        }
-
+        /// <summary>
+        /// 타일에 유닛을 배치합니다.
+        /// </summary>
         public void PlaceUnit(GameObject unit)
         {
             currentUnit = unit;
-            isOccupied = (unit != null);
-            if (unit != null)
-            {
-                unit.transform.position = transform.position;
-            }
+            isOccupied = true;
         }
 
-        public void ClearUnit()
+        /// <summary>
+        /// 유닛이 다른 곳으로 이동하거나 합성/제거될 때 타일을 비웁니다.
+        /// </summary>
+        public void ClearTile()
         {
             currentUnit = null;
             isOccupied = false;

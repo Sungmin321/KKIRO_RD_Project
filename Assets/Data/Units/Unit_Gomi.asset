@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d5ed2fde9867b74f8ca4b345ab60e54, type: 3}
+  m_Name: Unit_Gomi
+  m_EditorClassIdentifier: Assembly-CSharp::TDGame.Core.UnitDataSO
+  unitID: UNIT_GOMI
+  unitName: "\uACE0\uBBF8"
+  grade: 1
+  tribe: 1
+  damageType: 0
+  attackType: 0
+  baseDamage: 12
+  attackSpeed: 1
+  attackRange: 1
+  criticalChance: 0.05
+  criticalMultiplier: 1.5
+  maxMana: 100
+  manaGainOnAttack: 10
+  manaRegenPerSec: 2.5
+  skillDescription: "\uBBF8\uAC1C\uD55C \uAC15\uD0C0: \uACF5\uACA9 \uC2DC 15% \uD655\uB960\uB85C
+    \uC801\uC758 \uBC29\uC5B4\uB825\uC744 \uBB34\uC2DC\uD558\uACE0 \uD2B8\uB8E8 \uB370\uBBF8\uC9C0\uB97C
+    \uC785\uD799\uB2C8\uB2E4."

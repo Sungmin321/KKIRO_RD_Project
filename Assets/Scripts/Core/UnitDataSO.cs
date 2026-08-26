@@ -2,35 +2,54 @@ using UnityEngine;
 
 namespace TDGame.Core
 {
-    public enum UnitGrade { Common = 1, Rare = 2, Epic = 3, Legendary = 4, Mythical = 5 }
-    public enum DamageType { AD_Physical, AP_Magical }
-    public enum AttackType { Melee, Ranged }
-    public enum Tribe { None, Human, Beast, Undead, Elf, Mech, Dragon, Demon }
+    public enum UnitGrade
+    {
+        Common,
+        Uncommon,
+        Rare,
+        Ancient,
+        Mythical
+    }
 
-    [CreateAssetMenu(fileName = "NewUnitData", menuName = "TDGame/Unit Data")]
+    public enum Tribe
+    {
+        Beast,
+        Mechanical,
+        Elemental,
+        Abyssal,
+        Dragon
+    }
+
+    public enum AttackType
+    {
+        Single,
+        Splash
+    }
+
+    [CreateAssetMenu(fileName = "UnitData_", menuName = "TDGame/Unit Data", order = 1)]
     public class UnitDataSO : ScriptableObject
     {
-        [Header("1. 기본 정보 및 등급")]
+        [Header("1. 기본 정보 및 외형")]
         public string unitID;
         public string unitName;
+        public Sprite unitSprite;
         public UnitGrade grade = UnitGrade.Common;
-        public Tribe tribe = Tribe.None;
+        public Tribe tribe = Tribe.Beast;
 
-        [Header("2. 공격 속성")]
-        public DamageType damageType = DamageType.AD_Physical;
-        public AttackType attackType = AttackType.Ranged;
-
-        [Header("3. 전투 스탯")]
+        [Header("2. 전투 기본 스탯")]
         public double baseDamage = 10.0;
-        public float attackSpeed = 1.0f; // 초당 공격 횟수
-        public float attackRange = 2.5f;
+        public float attackSpeed = 1.0f;
+        public float attackRange = 1.0f;
+        public AttackType attackType = AttackType.Single;
+        public float splashRadius = 0f;
 
-        [Header("4. 치명타")]
+        [Header("3. 치명타 스탯")]
         [Range(0f, 1f)] public float criticalChance = 0.05f;
         public float criticalMultiplier = 1.5f;
 
-        [Header("5. 유틸 / 방깎 / 스킬")]
-        [Range(0f, 1f)] public float armorReductionRate = 0.0f; // 고정 방깎 비율 (예: 0.15 = 15%)
-        [TextArea(2, 4)] public string skillDescription;
+        [Header("4. 마나 및 스킬 (고등급용)")]
+        public float maxMana = 0f;
+        public float manaGainOnAttack = 0f;
+        public float manaRegenPerSec = 0f;
     }
 }
