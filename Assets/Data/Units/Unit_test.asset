@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d5ed2fde9867b74f8ca4b345ab60e54, type: 3}
   m_Name: Unit_test
   m_EditorClassIdentifier: Assembly-CSharp::TDGame.Core.UnitDataSO
-  unitID: 
-  unitName: 
+  unitID: test
+  unitName: test
   unitSprite: {fileID: 0}
   grade: 0
   tribe: 0
-  baseDamage: 10
+  baseDamage: 30
   attackSpeed: 1
   attackRange: 1
   attackType: 0

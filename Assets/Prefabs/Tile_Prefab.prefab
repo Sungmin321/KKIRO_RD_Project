@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8191433902907824836}
   - component: {fileID: 7703246590852878675}
   - component: {fileID: -4253175258558980076}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Tile_Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -109,10 +109,7 @@ MonoBehaviour:
   gridX: 0
   gridY: 0
   isOccupied: 0
-  currentUnit: {fileID: 0}
-  spriteRenderer: {fileID: 0}
-  defaultColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.5}
-  highlightColor: {r: 0.4, g: 0.8, b: 0.4, a: 0.8}
+  placedUnit: {fileID: 0}
 --- !u!61 &-4253175258558980076
 BoxCollider2D:
   m_ObjectHideFlags: 0

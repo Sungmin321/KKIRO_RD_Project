@@ -1,101 +1,136 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using TDGame.Core;
 using TDGame.Field;
+using TDGame.UI;
 
 namespace TDGame.Combat
 {
-    [RequireComponent(typeof(Collider2D))]
-    public class UnitDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class UnitDragHandler : MonoBehaviour
     {
-        private Vector3 startPosition;
         public Tile currentTile;
-        private Camera mainCamera;
+        private Vector3 screenPoint;
+        private Vector3 offset;
+        private Vector3 originalPosition;
+        private bool isDragging = false;
+        private UnitCombat unitCombat;
+        private Collider2D unitCollider;
 
         private void Start()
         {
-            mainCamera = Camera.main;
-            FindInitialTile();
+            unitCombat = GetComponent<UnitCombat>();
+            unitCollider = GetComponent<Collider2D>();
         }
 
-        public void FindInitialTile()
+        private Vector2 GetCurrentMousePosition()
         {
-            Collider2D col = Physics2D.OverlapPoint(transform.position);
-            if (col != null)
+            return Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
+        }
+
+        private void OnMouseDown()
+        {
+            if (GameManager.Instance != null && GameManager.Instance.isGameOver) return;
+            if (Camera.main == null) return;
+
+            // 유닛 클릭 시 하단 상태창 UI 갱신
+            if (UnitStatusUIController.Instance != null && unitCombat != null)
             {
-                Tile tile = col.GetComponent<Tile>();
-                if (tile != null)
+                UnitStatusUIController.Instance.ShowUnitStatus(unitCombat);
+            }
+
+            isDragging = true;
+            originalPosition = transform.position;
+
+            // 드래그 중 바닥 타일 레이캐스트를 가리지 않도록 콜라이더 비활성화
+            if (unitCollider != null) unitCollider.enabled = false;
+
+            Vector2 mousePos = GetCurrentMousePosition();
+            screenPoint = Camera.main.WorldToScreenPoint(transform.position);
+            offset = transform.position - Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, screenPoint.z));
+
+            if (currentTile != null)
+            {
+                currentTile.ClearTile();
+            }
+        }
+
+        private void OnMouseDrag()
+        {
+            if (!isDragging || Camera.main == null) return;
+
+            Vector2 mousePos = GetCurrentMousePosition();
+            Vector3 curScreenPoint = new Vector3(mousePos.x, mousePos.y, screenPoint.z);
+            Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + offset;
+
+            curPosition.z = -0.5f; // 타일보다 앞에 보이도록 설정
+            transform.position = curPosition;
+        }
+
+        private void OnMouseUp()
+        {
+            if (!isDragging || Camera.main == null) return;
+            isDragging = false;
+
+            Vector2 mousePos = GetCurrentMousePosition();
+            Vector3 worldPoint = Camera.main.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, -Camera.main.transform.position.z));
+            Vector2 rayOrigin = new Vector2(worldPoint.x, worldPoint.y);
+
+            // Tile 레이어 마스크를 가진 타일 탐색
+            RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.zero, 0f, LayerMask.GetMask("Tile"));
+
+            if (hit.collider != null)
+            {
+                Tile targetTile = hit.collider.GetComponent<Tile>();
+
+                // 1. 빈 타일인 경우 배치
+                if (targetTile != null && !targetTile.isOccupied)
                 {
-                    currentTile = tile;
-                    tile.PlaceUnit(gameObject);
+                    PlaceOnTile(targetTile);
+                    return;
+                }
+                // 2. 다른 유닛이 점유 중인 타일인 경우 위치 맞바꾸기(Swap)
+                else if (targetTile != null && targetTile.isOccupied && targetTile != currentTile)
+                {
+                    GameObject otherUnit = targetTile.placedUnit;
+                    Tile otherOriginalTile = targetTile;
+
+                    if (currentTile != null && otherUnit != null)
+                    {
+                        UnitDragHandler otherDrag = otherUnit.GetComponent<UnitDragHandler>();
+                        if (otherDrag != null)
+                        {
+                            currentTile.PlaceUnit(otherUnit);
+                            otherDrag.currentTile = currentTile;
+                        }
+                    }
+
+                    PlaceOnTile(otherOriginalTile);
+                    return;
                 }
             }
-        }
 
-        public void OnBeginDrag(PointerEventData eventData)
-        {
-            startPosition = transform.position;
-            // 드래그 중인 유닛을 화면 맨 앞으로 표시
-            SpriteRenderer sr = GetComponent<SpriteRenderer>();
-            if (sr != null) sr.sortingOrder = 20;
-        }
-
-        public void OnDrag(PointerEventData eventData)
-        {
-            if (mainCamera == null) mainCamera = Camera.main;
-            Vector3 mousePos = mainCamera.ScreenToWorldPoint(eventData.position);
-            mousePos.z = 0f;
-            transform.position = mousePos;
-        }
-
-        public void OnEndDrag(PointerEventData eventData)
-        {
-            SpriteRenderer sr = GetComponent<SpriteRenderer>();
-            if (sr != null) sr.sortingOrder = 5;
-
-            // 마우스 위치에 있는 타일 탐색
-            Collider2D[] hits = Physics2D.OverlapPointAll(transform.position);
-            Tile targetTile = null;
-
-            foreach (var hit in hits)
+            // 배치할 타일을 찾지 못했을 때 기존 타일로 복귀
+            if (currentTile != null)
             {
-                Tile t = hit.GetComponent<Tile>();
-                if (t != null)
-                {
-                    targetTile = t;
-                    break;
-                }
+                PlaceOnTile(currentTile);
             }
-
-            // 1. 빈 타일로 이동
-            if (targetTile != null && !targetTile.isOccupied)
-            {
-                if (currentTile != null) currentTile.ClearTile();
-                targetTile.PlaceUnit(gameObject);
-                currentTile = targetTile;
-                transform.position = targetTile.transform.position;
-            }
-            // 2. 다른 유닛과 위치 맞교환 (Swap)
-            else if (targetTile != null && targetTile.isOccupied && targetTile != currentTile)
-            {
-                GameObject otherUnit = targetTile.currentUnit;
-
-                if (currentTile != null)
-                {
-                    currentTile.currentUnit = otherUnit;
-                    otherUnit.transform.position = currentTile.transform.position;
-                    UnitDragHandler otherHandler = otherUnit.GetComponent<UnitDragHandler>();
-                    if (otherHandler != null) otherHandler.currentTile = currentTile;
-                }
-
-                targetTile.currentUnit = gameObject;
-                currentTile = targetTile;
-                transform.position = targetTile.transform.position;
-            }
-            // 3. 타일 바깥에 떨어뜨린 경우 원위치 복귀
             else
             {
-                transform.position = startPosition;
+                transform.position = originalPosition;
+                if (unitCollider != null) unitCollider.enabled = true;
             }
+        }
+
+        private void PlaceOnTile(Tile tile)
+        {
+            currentTile = tile;
+            Vector3 pos = currentTile.transform.position;
+            pos.z = -0.1f;
+            transform.position = pos;
+            currentTile.PlaceUnit(gameObject);
+
+            // 배치가 끝나면 다시 클릭할 수 있도록 콜라이더 활성화
+            if (unitCollider != null) unitCollider.enabled = true;
         }
     }
 }

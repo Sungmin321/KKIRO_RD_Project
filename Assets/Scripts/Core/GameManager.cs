@@ -1,20 +1,7 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using TDGame.Utils;
 
 namespace TDGame.Core
 {
-    public enum GameState { Lobby, InGame, Equipment, GameOver, Victory }
-
-    [System.Serializable]
-    public struct HPGrowthSegment
-    {
-        public int startRound;
-        public int endRound;
-        public float growthRate; // 0.12 = 12%
-    }
-
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
@@ -23,9 +10,21 @@ namespace TDGame.Core
 
         [Header("게임 진행 상태")]
         public int currentRound = 1;
-        public int currentMonsterCount = 0;
+        [SerializeField] private int _currentMonsterCount = 0; // 프라이빗으로 변경
         public double currentGold = 50.0;
         public int currentSeed = 0;
+        public bool isGameOver = false; // 게임 오버 상태 추가
+
+        // 외부에서 몬스터 수를 수정할 때 게임 오버 체크를 위한 프로퍼티
+        public int currentMonsterCount
+        {
+            get => _currentMonsterCount;
+            set
+            {
+                _currentMonsterCount = value;
+                CheckGameOver(); // 수치가 바뀔 때마다 체크
+            }
+        }
 
         [Header("소환 시스템")]
         public int summonCount = 0;
@@ -36,37 +35,44 @@ namespace TDGame.Core
         {
             if (Instance == null) Instance = this;
             else Destroy(gameObject);
+
+            isGameOver = false;
+            Time.timeScale = 1f; // 시작 시 시간 정상화
         }
 
         /// <summary>
-        /// 소환 횟수에 따라 점진적으로 증가하는 소환 비용 계산
+        /// 몬스터 수가 100마리를 넘었는지 확인
         /// </summary>
+        private void CheckGameOver()
+        {
+            if (isGameOver) return;
+
+            if (_currentMonsterCount >= MAX_MONSTER_LIMIT)
+            {
+                isGameOver = true;
+                Time.timeScale = 0f; // 게임 일시 정지
+                Debug.Log("<color=red><b>[GAME OVER]</b></color> 몬스터가 100마리에 도달했습니다!");
+                // 추후 이곳에 게임 오버 UI 팝업 로직 추가
+            }
+        }
+
         public double GetSummonCost()
         {
             return baseSummonCost + (summonCount * summonCostIncrease);
         }
 
-        /// <summary>
-        /// 라운드별 몬스터 최대 체력 계산
-        /// </summary>
         public double GetEnemyMaxHP(int round, bool isBoss)
         {
             double baseHp = 100.0 * Mathf.Pow(1.15f, round - 1);
             return isBoss ? baseHp * 10.0 : baseHp;
         }
 
-        /// <summary>
-        /// 라운드별 몬스터 처치 골드 보상
-        /// </summary>
         public double GetDropGold(int round, bool isBoss)
         {
             double baseGold = 2.0 + (round * 0.5);
             return isBoss ? baseGold * 5.0 : baseGold;
         }
 
-        /// <summary>
-        /// 보스 처치 시 씨앗 보상
-        /// </summary>
         public int GetBossDropSeed(int round)
         {
             return 1;

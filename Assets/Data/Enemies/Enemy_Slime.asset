@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: Enemy_Slime
   m_EditorClassIdentifier: Assembly-CSharp::TDGame.Core.EnemyDataSO
   enemyName: Slime
-  moveSpeed: 1.5
+  moveSpeed: 3
   baseArmor: 5
